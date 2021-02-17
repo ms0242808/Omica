@@ -1,5 +1,6 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const { autoUpdater } = require('electron-updater');
+var AutoLaunch = require('auto-launch');
 
 let mainWindow;
 
@@ -8,6 +9,7 @@ function createWindow () {
     width: 800,
     height: 600,
     webPreferences: {
+      enableRemoteModule: true,
       nodeIntegration: true,
     },
   });
@@ -50,4 +52,22 @@ autoUpdater.on('update-downloaded', () => {
 
 ipcMain.on('restart_app', () => {
   autoUpdater.quitAndInstall();
+});
+
+var autoLauncher = new AutoLaunch({
+  name: 'omica',
+  path: app.getPath('exe'),
+});
+
+autoLauncher.enable();
+
+autoLauncher.isEnabled()
+.then(function(isEnabled){
+    if(isEnabled){
+      return;
+    }
+    autoLauncher.enable();
+})
+.catch(function(err){
+  // handle error
 });

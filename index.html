@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <head>
-  <title>Electron Auto Update Example</title>
+  <title>OMICA</title>
+  <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-functions.js"></script>
+  <script>let $ = require('jquery');</script>
   <style>
     body {
       box-sizing: border-box;
       margin: 0;
       padding: 20px;
       font-family: sans-serif;
-      background-color: #eaeaea;
+      background-color: #e4e4e4;
       text-align: center;
     }
     #notification {
@@ -26,7 +30,13 @@
   </style>
 </head>
 <body>
-  <h1>Electron Auto Update Example</h1>
+  <h1>OMICA Software</h1>
+  <div class="pt"><a>Machine ID: <a id="machineID"></a></a><br/></div>
+  <div class="pt"><a>Brand name: <a id="brand"></a></a><br/></div>
+  <div class="pt"><a>Store location: <a id="store"></a></a><br/></div>
+  <div class="pt"><a>Model name: <a id="modelname"></a></a><br/></div>
+  <div class="pt"><a>Manufuture: DrinkTec</a><br/></div>
+  <div class="pt"><a>Made: <a id="made"></a></a><br/></div>
   <p id="version"></p>
   <div id="notification" class="hidden">
     <p id="message"></p>
@@ -38,8 +48,19 @@
     </button>
   </div>
   <script>
+    function updateTextFile(file,updateT,fs){
+      var utf16buffer = Buffer.from(`${updateT}`, 'ascii');
+      fs.appendFile(file,"\n"+utf16buffer, function (err){
+        if(err) throw err;
+        console.log('Latest Updated!');
+      });
+    }
+    
     const { ipcRenderer } = require('electron');
     const version = document.getElementById('version');
+    const notification = document.getElementById('notification');
+    const message = document.getElementById('message');
+    const restartButton = document.getElementById('restart-button');
     
     ipcRenderer.send('app_version');
     ipcRenderer.on('app_version', (event, arg) => {
@@ -47,10 +68,6 @@
       version.innerText = 'Version ' + arg.version;
     });
 
-    const notification = document.getElementById('notification');
-    const message = document.getElementById('message');
-    const restartButton = document.getElementById('restart-button');
-    
     ipcRenderer.on('update_available', () => {
       ipcRenderer.removeAllListeners('update_available');
       message.innerText = 'A new update is available. Downloading now...';
@@ -67,9 +84,126 @@
     function closeNotification() {
       notification.classList.add('hidden');
     }
-
+    
     function restartApp() {
       ipcRenderer.send('restart_app');
+    }
+
+    const fs = require('fs');
+    const electron = require('electron');
+    const path = require('path');
+    const app = require('electron').remote.app;
+    console.log(app.getAppPath());
+    const dir = app.getPath('desktop').toString()+'/DrinkTec';
+    // console.log(dir);
+    var localtime = '',
+    brandTxt = '';
+    if(fs.existsSync(dir)){
+      brandTxt = readTextFile(dir+"/brand.txt");
+      localtime = readTextFile(dir+"/latest.txt").pop();
+      console.log("local time "+localtime);
+      $('#machineID').text(brandTxt[0]);
+      $('#brand').text(brandTxt[1]);
+      $('#store').text(brandTxt[2]);
+      $('#modelname').text(brandTxt[3]);
+      $('#made').text(brandTxt[4]);
+    }else{
+      console.log(dir+" Empty");
+    }
+
+    var firebaseConfig = {
+      apiKey: "AIzaSyCXmxPEo5rZ9MDC581w2mtK_Af6P2ebg6E",
+      authDomain: "omica-test.firebaseapp.com",
+      databaseURL: "https://omica-test.firebaseio.com",
+      projectId: "omica-test",
+      storageBucket: "omica-test.appspot.com",
+      messagingSenderId: "154320823051",
+      appId: "1:154320823051:web:8aa2dab367d1261e1f780e",
+      measurementId: "G-N755JWS2Y6"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    db.settings({ timestampsInSnapshots: true }); 
+    
+    // checkRecipe();
+    var brandL = $('#brand').text()+"-"+$('#store').text();
+    async function checkRecipe(){
+      // get timestamp and header
+      var cloudtime = '';
+      var header = [];
+      const recipeThfunction = await firebase.functions().httpsCallable('getRecipeHeader');
+      await recipeThfunction({docPath:'recipes/'+brandL}).then(result => {
+        for(x in result.data.header){
+          // console.log(result.data.header[x]);
+          header = result.data.header.slice(1,-1);// remove first and last item
+        }
+        header.unshift("Recipe No.","Recipe");
+        cloudtime = result.data.timestamp;
+        // console.log("timestamp: " + result.data.timestamp);
+      });
+
+      // cheeck timestamp with local file
+      console.log("cloud time "+cloudtime);
+      
+      // if local time < cloud time update recipe
+      if(localtime && localtime<cloudtime){
+        // get all subcollection title(id)
+        var recipeNo = 1;
+        var subcol = [];
+        const cloudfunction = await firebase.functions().httpsCallable('getSubCollections');
+        await cloudfunction({docPath:'recipes/'+brandL}).then(result => {
+          // console.log(result.data.collections);
+          for(y in result.data.collections){
+            subcol[y] = result.data.collections[y];
+          }
+        });
+        // save header
+        var utf16buffers = Buffer.from(`\ufeff${header}`, 'utf16le');
+        await fs.writeFileSync(dir+'test-utf16le.txt', utf16buffers);
+        // get all recipe by subcollection title(id)
+        const recipefunction = await firebase.functions().httpsCallable('getRecipe');
+        var rows = [];
+        for(z in subcol){
+          await recipefunction({docPath:'recipes/'+brandL,drink:subcol[z]}).then(result => {
+            // console.log(result.data.id);
+            // console.log(result.data.recipe);
+            rows = result.data.recipe.slice(0,-1);// .join("\n");
+            rows.map(function(item,index){
+              item.unshift(recipeNo,subcol[z]);
+              // console.log(item);
+              recipeNo += 1;
+            });
+            rows = rows.join("\n");
+            var utf16buffer = Buffer.from(`${rows}`, 'utf16le');
+            fs.appendFile(dir+'test-utf16le.txt',"\n"+utf16buffer, function (err){
+              if (err) throw err;
+              console.log('Saved!');
+            });
+          });
+        }
+        await fs.rename(dir+'test-utf16le.txt', dir+'/Recipes.csv', (err) => {
+          if(err) throw err;
+          console.log('Rename complete!');
+          updateTextFile(dir+'/latest.txt',cloudtime,fs);
+        });
+      }
+      setTimeout(checkRecipe,10000); // inifite check/ 60000 = 60s
+    }
+
+    function readTextFile(file){
+      var rawFile = new XMLHttpRequest();
+      var allText = "";
+      rawFile.open("GET", file, false);
+      rawFile.onreadystatechange = function (){
+        if(rawFile.readyState === 4){
+          if(rawFile.status === 200 || rawFile.status == 0){
+            allText = rawFile.responseText.split("\n");
+          }
+        }
+      }
+      rawFile.send(null);
+      return allText;
     }
   </script>
 </body>
