@@ -1,16 +1,19 @@
 {
   "name": "omica",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Omica software provided by DRINKTEC",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "electron-builder build --mac --win --publish never",
+    "deploy": "electron-builder build --mac --win --publish always"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/ms0242808/Omica.git"
   },
-  "author": "DRINKTE LTD.",
+  "author": "DRINKTEC LTD.",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/ms0242808/Omica/issues"
