@@ -18,8 +18,12 @@ function createWindow () {
     mainWindow = null;
   });
   mainWindow.once('ready-to-show', () => {
-    autoUpdater.checkForUpdatesAndNotify();
+    setTimeout(autoUpdateCheck,10000);
   });
+}
+
+function autoUpdateCheck(){
+  autoUpdater.checkForUpdatesAndNotify();
 }
 
 app.on('ready', () => {
