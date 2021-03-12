@@ -65,13 +65,18 @@
     const restartButton = document.getElementById('restart-button');
     const shutdown = require('electron-shutdown-command');
 
-    shutdown.shutdown({
-      force: true,
-      timerseconds: 60,
-      sudo: true,
-      debug: true,
-      quitapp: true
+    ipcRenderer.on('message', (event, arg) => {
+      // ipcRenderer.removeAllListeners('app_version');
+      version.innerText = 'Version ' + arg.message;
     });
+
+    // shutdown.shutdown({
+    //   force: true,
+    //   timerseconds: 60,
+    //   sudo: true,
+    //   debug: true,
+    //   quitapp: true
+    // });
 
     ipcRenderer.send('app_version');
     ipcRenderer.on('app_version', (event, arg) => {

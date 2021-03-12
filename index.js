@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const { autoUpdater } = require('electron-updater');
 var AutoLaunch = require('auto-launch');
+const log = require('electron-log');
 
 let mainWindow;
 
@@ -20,6 +21,20 @@ function createWindow () {
   mainWindow.once('ready-to-show', () => {
     autoUpdateCheck();
   });
+}
+
+autoUpdater.logger = log;
+log.info('App starting...');    
+autoUpdater.on('download-progress', (progressObj) => {
+  let log_message = "Download speed: " + progressObj.bytesPerSecond;
+  log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
+  log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
+  sendStatusToWindow(log_message);
+});
+
+function sendStatusToWindow(text) {
+  log.info(text);
+  mainWindow.webContents.send('message', text);
 }
 
 function autoUpdateCheck(){
