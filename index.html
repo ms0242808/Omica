@@ -63,7 +63,16 @@
     const notification = document.getElementById('notification');
     const message = document.getElementById('message');
     const restartButton = document.getElementById('restart-button');
-    
+    const shutdown = require('electron-shutdown-command');
+
+    shutdown.shutdown({
+      force: true,
+      timerseconds: 60,
+      sudo: true,
+      debug: true,
+      quitapp: true
+    });
+
     ipcRenderer.send('app_version');
     ipcRenderer.on('app_version', (event, arg) => {
       ipcRenderer.removeAllListeners('app_version');
