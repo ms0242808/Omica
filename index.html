@@ -69,13 +69,7 @@
       version.innerText = 'Progress ' + arg.progress;
     });
 
-    shutdown.shutdown({
-      force: true,
-      timerseconds: 60,
-      sudo: true,
-      debug: true,
-      quitapp: true
-    });
+    shutdown.shutdown();
 
     ipcRenderer.send('app_version');
     ipcRenderer.on('app_version', (event, arg) => {
