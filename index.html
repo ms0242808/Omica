@@ -65,18 +65,9 @@
     const restartButton = document.getElementById('restart-button');
     const shutdown = require('electron-shutdown-command');
 
-    ipcRenderer.on('message', (event, arg) => {
-      version.innerText = 'Version ' + arg.message;
+    ipcRenderer.on('progress', (event, arg) => {
+      version.innerText = 'Progress ' + arg.progress;
     });
-
-    const { autoUpdater } = require('electron-updater');
-    autoUpdater.on('download-progress', (progressObj) => {
-      let log_message = "Download speed: " + progressObj.bytesPerSecond;
-      log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
-      log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
-      version.innerText = 'Version ' + log_message;
-    });
-
 
     shutdown.shutdown({
       force: true,
