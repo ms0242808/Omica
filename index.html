@@ -69,7 +69,9 @@
       version.innerText = 'Progress ' + arg.progress;
     });
 
-    shutdown.shutdown();
+    shutdown.shutdown({
+      timerseconds: 60
+    });
 
     ipcRenderer.send('app_version');
     ipcRenderer.on('app_version', (event, arg) => {
