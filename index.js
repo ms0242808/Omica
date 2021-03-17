@@ -27,8 +27,7 @@ function createWindow () {
 autoUpdater.logger = log;
 log.info('App starting...');    
 autoUpdater.on('download-progress', (progressObj) => {
-  let log_message = "Download speed: " + progressObj.bytesPerSecond;
-  log_message = log_message + ' - Downloaded ' + Math.round(progressObj.percent) + '%';
+  let log_message = ' - Downloaded ' + Math.round(progressObj.percent) + '%';
   log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
   sendStatusToWindow(log_message);
 });
