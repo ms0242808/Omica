@@ -42,6 +42,7 @@
   <span>Copyright &copy; DRINKTEC</span>
   <div id="notification" class="hidden">
     <p id="message"></p>
+    <p id="progress"></p>
     <button id="close-button" onClick="closeNotification()">
       Close
     </button>
@@ -64,9 +65,10 @@
     const message = document.getElementById('message');
     const restartButton = document.getElementById('restart-button');
     const shutdown = require('electron-shutdown-command');
+    const progress = document.getElementById('progress');
 
     ipcRenderer.on('message', (event, text) => {
-      version.innerText = 'Progress ' + text;
+      progress.innerText = text;
     });
 
     function poweroff(){
