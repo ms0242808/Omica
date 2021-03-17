@@ -71,12 +71,6 @@
       progress.innerText = text;
     });
 
-    function poweroff(){
-      shutdown.shutdown({
-        timerseconds: 60
-      });
-    }
-
     ipcRenderer.send('app_version');
     ipcRenderer.on('app_version', (event, arg) => {
       ipcRenderer.removeAllListeners('app_version');
@@ -103,6 +97,12 @@
     
     function restartApp() {
       ipcRenderer.send('restart_app');
+    }
+
+    function poweroff(){
+      shutdown.shutdown({
+        timerseconds: 60
+      });
     }
 
     const fs = require('fs');
@@ -203,7 +203,7 @@
           updateTextFile(dir+'/latest.txt',cloudtime,fs);
         });
       }
-      setTimeout(checkRecipe,10000); // inifite check/ 60000 = 60s
+      setTimeout(checkRecipe,60000); // inifite check/ 60000 = 60s
     }
 
     function readTextFile(file){
