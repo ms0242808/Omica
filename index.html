@@ -4,6 +4,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.2.10/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.2.10/firebase-firestore.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.2.10/firebase-functions.js"></script>
+  <script src="fire.js"></script>
   <script>let $ = require('jquery');</script>
   <style>
     body {
@@ -127,17 +128,6 @@
       console.log(dir+" Empty");
     }
 
-    var firebaseConfig = {
-      apiKey: "AIzaSyC-RJrAqnUJbhfCJOz6Y7k7voxaHN-cuy0",
-      authDomain: "omica-cloud.firebaseapp.com",
-      projectId: "omica-cloud",
-      storageBucket: "omica-cloud.appspot.com",
-      messagingSenderId: "404980456265",
-      appId: "1:404980456265:web:fd446f54770ddd13429898",
-      measurementId: "G-1YW3BVP12K"
-    };
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     db.settings({ timestampsInSnapshots: true }); 
     
