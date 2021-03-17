@@ -30,10 +30,7 @@ autoUpdater.on('download-progress', (progressObj) => {
   let log_message = "Download speed: " + progressObj.bytesPerSecond;
   log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
   log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
-  // sendStatusToWindow(log_message);
-  ipcMain.on('progress', (event) => {
-    event.sender.send('progress', { progress: log_message });
-  });
+  sendStatusToWindow(log_message);
 });
 
 function sendStatusToWindow(text) {
