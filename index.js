@@ -28,7 +28,7 @@ autoUpdater.logger = log;
 log.info('App starting...');    
 autoUpdater.on('download-progress', (progressObj) => {
   let log_message = "Download speed: " + progressObj.bytesPerSecond;
-  log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
+  log_message = log_message + ' - Downloaded ' + (progressObj.percent*100) + '%';
   log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
   sendStatusToWindow(log_message);
 });
@@ -40,7 +40,7 @@ function sendStatusToWindow(text) {
 
 function autoUpdateCheck(){
   autoUpdater.checkForUpdatesAndNotify();
-  setTimeout(autoUpdateCheck,10000);
+  setTimeout(autoUpdateCheck,60000);
 }
 
 app.on('ready', () => {
