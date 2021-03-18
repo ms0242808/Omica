@@ -14,7 +14,7 @@
     "productName": "OMICA",
     "copyright": "Copyright © 2021 ${author}",
     "win": {
-      "icon": "./icon/icon.png"
+      "icon": "./build/icon.png"
     },
     "files": [
       "./build/**/*",
