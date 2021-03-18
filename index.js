@@ -82,10 +82,10 @@ autoLauncher.enable();
 
 autoLauncher.isEnabled()
 .then(function(isEnabled){
-    if(isEnabled){
-      return;
-    }
-    autoLauncher.enable();
+  if(isEnabled){
+    return;
+  }
+  autoLauncher.enable();
 })
 .catch(function(err){
   // handle error
