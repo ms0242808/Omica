@@ -13,7 +13,7 @@ function createWindow () {
       enableRemoteModule: true,
       nodeIntegration: true,
     },
-    icon: __dirname + '/build/icon.icns',
+    icon: __dirname + './build/icon.icns',
   });
   mainWindow.loadFile('index.html');
   mainWindow.on('closed', function () {
