@@ -12,7 +12,8 @@ function createWindow () {
     webPreferences: {
       enableRemoteModule: true,
       nodeIntegration: true,
-    }
+    },
+    icon: __dirname + '/build/icon.icns',
   });
   mainWindow.loadFile('index.html');
   mainWindow.on('closed', function () {
