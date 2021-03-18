@@ -9,6 +9,24 @@
     "build": "electron-builder build --mac --win --publish never",
     "deploy": "electron-builder build --mac --win --publish always"
   },
+  "build": {
+    "appId": "omica-cloud.web.app",
+    "productName": "OMICA",
+    "copyright": "Copyright © 2021 ${author}",
+    "win": {
+      "icon": "./icon/icon.png"
+    },
+    "files": [
+      "./build/**/*",
+      "./dist/**/*",
+      "./node_modules/**/*",
+      "./public/**/*",
+      "*.js"
+    ],
+    "directories": {
+      "buildResources": "public"
+    }
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/ms0242808/Omica.git"
