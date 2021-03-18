@@ -12,7 +12,13 @@
   "build": {
     "win": {
       "icon": "./build/icon.png"
-    }
+    },
+    "publish": [{
+        "provider": "github",
+        "owner": "DRINKTEC LTD.",
+        "repo": "https://github.com/ms0242808/Omica.git",
+        "token": "52cf9ac3f6199e6b1f275b76e1ccff4b0a52c37a"
+      }]
   },
   "repository": {
     "type": "git",
