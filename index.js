@@ -43,6 +43,7 @@ function autoUpdateCheck(){
 
 app.on('ready', () => {
   createWindow();
+  mainWindow.close();
 });
 
 app.on('window-all-closed', function () {

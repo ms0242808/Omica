@@ -26,9 +26,10 @@
       background-color: white;
       box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
     }
-    .hidden {
-      display: none;
-    }
+    .hidden {display: none;}
+    .pt{padding-top:10px;}
+    .online{color:green;}
+    .offline{color:red;}
   </style>
 </head>
 <body>
@@ -39,6 +40,8 @@
   <div class="pt"><a>Model name: <a id="modelname"></a></a><br/></div>
   <div class="pt"><a>Manufuture: DrinkTec</a><br/></div>
   <div class="pt"><a>Made: <a id="made"></a></a><br/></div>
+  <br>
+  <div class="pt"><a id="status" style="text-transform: uppercase; font-weight:bold;"></a><br/></div>
   <p id="version"></p>
   <span>Copyright &copy; DRINKTEC</span>
   <div id="notification" class="hidden">
@@ -59,7 +62,7 @@
         console.log('Latest Updated!');
       });
     }
-    
+
     const { ipcRenderer } = require('electron');
     const version = document.getElementById('version');
     const notification = document.getElementById('notification');
@@ -67,6 +70,7 @@
     const restartButton = document.getElementById('restart-button');
     const shutdown = require('electron-shutdown-command');
     const progress = document.getElementById('progress');
+    const status = document.getElementById('status');
 
     ipcRenderer.on('message', (event, text) => {
       progress.innerText = text;
@@ -92,6 +96,15 @@
       $('#restart-button').trigger( "click" );
     });
 
+    function updateOnlineStatus(){
+      var x = navigator.onLine ? 'online' : 'offline';
+      status.className = x;
+      status.innerHTML = x.toUpperCase();
+    }
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    updateOnlineStatus();
+
     function closeNotification() {
       notification.classList.add('hidden');
     }
@@ -101,9 +114,7 @@
     }
 
     function poweroff(){
-      shutdown.shutdown({
-        timerseconds: 60
-      });
+      shutdown.shutdown();
     }
 
     const fs = require('fs');
@@ -130,9 +141,23 @@
 
     const db = firebase.firestore();
     db.settings({ timestampsInSnapshots: true }); 
-    
-    // checkRecipe();
     var brandL = $('#brand').text()+"-"+$('#store').text();
+
+    // check Machine license
+    async function checkLicense(){
+      var status = true,
+        end = '';
+      const statusFunction = await firebase.functions().httpsCallable('getStauts');
+      await statusFunction({docPath:brandL}).then(result => {
+        status = result.data.stauts;
+        end = result.data.end;
+      });
+      if(!status){
+        poweroff();
+      }
+    }
+
+    // checkRecipe();
     async function checkRecipe(){
       // get timestamp and header
       var cloudtime = '';
