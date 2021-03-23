@@ -104,7 +104,7 @@
     window.addEventListener('online', updateOnlineStatus);
     window.addEventListener('offline', updateOnlineStatus);
     updateOnlineStatus();
-
+    checkLicense();
     function closeNotification() {
       notification.classList.add('hidden');
     }
@@ -142,18 +142,18 @@
     const db = firebase.firestore();
     db.settings({ timestampsInSnapshots: true }); 
     var brandL = $('#brand').text()+"-"+$('#store').text();
-
+    brandL = "/chatime/taipei";
     // check Machine license
     async function checkLicense(){
-      var status = true,
+      var status = '',
         end = '';
-      const statusFunction = await firebase.functions().httpsCallable('getStauts');
+      const statusFunction = await firebase.functions().httpsCallable('getStatus');
       await statusFunction({docPath:brandL}).then(result => {
-        status = result.data.stauts;
+        status = result.data.status;
         end = result.data.end;
       });
-      if(!status){
-        poweroff();
+      if(!status){  // if status = false, power off
+        // poweroff();
       }
     }
 
