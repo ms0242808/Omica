@@ -104,7 +104,9 @@
     window.addEventListener('online', updateOnlineStatus);
     window.addEventListener('offline', updateOnlineStatus);
     updateOnlineStatus();
-    checkLicense();
+    
+    // checkLicense();
+    
     function closeNotification() {
       notification.classList.add('hidden');
     }
@@ -123,7 +125,6 @@
     const app = require('electron').remote.app;
     console.log(app.getAppPath());
     const dir = app.getPath('desktop').toString()+'/DrinkTec';
-    // console.log(dir);
     var localtime = '',
     brandTxt = '';
     if(fs.existsSync(dir)){
@@ -142,7 +143,6 @@
     const db = firebase.firestore();
     db.settings({ timestampsInSnapshots: true }); 
     var brandL = $('#brand').text()+"-"+$('#store').text();
-    brandL = "/chatime/taipei";
     // check Machine license
     async function checkLicense(){
       var status = '',
@@ -153,7 +153,7 @@
         end = result.data.end;
       });
       if(!status){  // if status = false, power off
-        // poweroff();
+        poweroff();
       }
     }
 
