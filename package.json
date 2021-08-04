@@ -1,6 +1,6 @@
 {
   "name": "omica",
-  "version": "1.0.22",
+  "version": "v1.0.2021.28",
   "description": "Omica software provided by DRINKTEC",
   "main": "index.js",
   "scripts": {
@@ -28,6 +28,8 @@
     "electron-log": "^4.3.2",
     "electron-shutdown-command": "^2.0.1",
     "electron-updater": "^4.3.5",
-    "jquery": "^3.5.1"
+    "eol": "^0.9.1",
+    "jquery": "^3.5.1",
+    "simple-json-db": "^1.2.3"
   }
 }

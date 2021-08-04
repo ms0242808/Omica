@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <head>
   <title>OMICA</title>
-  <script src="https://www.gstatic.com/firebasejs/8.2.10/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.2.10/firebase-firestore.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.2.10/firebase-functions.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-functions.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-storage.js"></script>
   <script src="fire.js"></script>
   <script>let $ = require('jquery');</script>
   <style>
@@ -34,16 +35,25 @@
 </head>
 <body>
   <h1>OMICA Software</h1>
-  <div class="pt"><a>Machine ID: <a id="machineID"></a></a><br/></div>
-  <div class="pt"><a>Brand name: <a id="brand"></a></a><br/></div>
-  <div class="pt"><a>Store location: <a id="store"></a></a><br/></div>
-  <div class="pt"><a>Model name: <a id="modelname"></a></a><br/></div>
-  <div class="pt"><a>Manufuture: DrinkTec</a><br/></div>
-  <div class="pt"><a>Made: <a id="made"></a></a><br/></div>
+  <div class="contentSetup"></div>
+  <div class="contentDetails" hidden>
+    <div class="pt"><a>Machine ID: <a id="machineID"></a></a><br/></div>
+    <div class="pt"><a>Brand name: <a id="brand"></a></a><br/></div>
+    <div class="pt"><a>Store location: <a id="store"></a></a><br/></div>
+    <div class="pt"><a>Model name: <a id="modelname"></a></a><br/></div>
+    <div class="pt"><a>Manufuture: Drinktec</a><br/></div>
+    <div class="pt"><a>Made: <a id="made"></a></a><br/></div>
+  </div>
   <br>
   <div class="pt"><a id="status" style="text-transform: uppercase; font-weight:bold;"></a><br/></div>
   <p id="version"></p>
   <span>Copyright &copy; DRINKTEC</span>
+  <button id="s" onClick="uploadStats()">
+    upload Stats
+  </button>
+  <!-- <button id="ss" onClick="dbJson()">
+    upload File
+  </button> -->
   <div id="notification" class="hidden">
     <p id="message"></p>
     <p id="progress"></p>
@@ -55,6 +65,12 @@
     </button>
   </div>
   <script>
+    // // if(location.hostname === "localhost"){
+      // var db2 = firebase.firestore();
+      // firebase.functions().useFunctionsEmulator("http://localhost:5001");
+      // db2.useEmulator("localhost", 8080);
+    // // }
+
     function updateTextFile(file,updateT,fs){
       var utf16buffer = Buffer.from(`${updateT}`, 'ascii');
       fs.appendFile(file,"\n"+utf16buffer, function (err){
@@ -118,27 +134,21 @@
     function poweroff(){
       shutdown.shutdown();
     }
-
-    const fs = require('fs');
-    const electron = require('electron');
-    const path = require('path');
-    const app = require('electron').remote.app;
-    console.log(app.getAppPath());
-    const dir = app.getPath('desktop').toString()+'/DrinkTec';
-    var localtime = '',
-    brandTxt = '';
-    if(fs.existsSync(dir)){
-      brandTxt = readTextFile(dir+"/brand.txt");
-      localtime = readTextFile(dir+"/latest.txt").pop();
-      console.log("local time "+localtime);
-      $('#machineID').text(brandTxt[0]);
-      $('#brand').text(brandTxt[1]);
-      $('#store').text(brandTxt[2]);
-      $('#modelname').text(brandTxt[3]);
-      $('#made').text(brandTxt[4]);
-    }else{
-      console.log(dir+" Empty");
-    }
+    
+    const JSONdb = require('simple-json-db'),
+     localDB = new JSONdb('db.json'),
+     fs = require('fs'),
+     electron = require('electron'),
+     path = require('path'),
+     app = require('electron').remote.app,
+     dir = app.getPath('desktop').toString()+'/DrinkTec';
+    
+    dbJson();
+    var arr = localDB.get('Update'),
+     localtime = arr[arr.length - 1];
+    console.log('app:',app.getAppPath());
+    console.log('db:',app.getAppPath('db.json'));
+    console.log("local time",localtime);
 
     const db = firebase.firestore();
     db.settings({ timestampsInSnapshots: true }); 
@@ -156,12 +166,12 @@
         poweroff();
       }
     }
-
-    // checkRecipe();
-    async function checkRecipe(){
-      // get timestamp and header
+    
+    getRB0();
+    async function getRB0(){
+      const eol = require('eol');
       var cloudtime = '';
-      var header = [];
+      var header,newheader = [];
       const recipeThfunction = await firebase.functions().httpsCallable('getRecipeHeader');
       await recipeThfunction({docPath:'recipes/'+brandL}).then(result => {
         for(x in result.data.header){
@@ -169,56 +179,146 @@
           header = result.data.header.slice(1,-1);// remove first and last item
         }
         header.unshift("Recipe No.","Recipe");
+        newheader.push(header);
         cloudtime = result.data.timestamp;
-        // console.log("timestamp: " + result.data.timestamp);
+      });
+      if(localtime && localtime<cloudtime){
+        var cat = await getCategory(),
+         recipeNo = 1,
+         subcol,rows,newRows = [];
+        for(c in cat){
+          var drink = await getCategoryDrink(cat[c]),
+           drinkCount = 0;
+          for(var i=0;i<10;i++){
+            drinkCount++;
+            if(drink[i]){
+              const recipefunction = await firebase.functions().httpsCallable('getRecipe');
+              await recipefunction({docPath:'recipes/'+brandL,drink:drink[i].toString()}).then(result => {
+                rows = result.data.recipe.slice(0,-1);
+                recipeNo = result.data.number;
+                rows.map(function(item,index){
+                  item.unshift(recipeNo,drink[i]);
+                  recipeNo += 1;
+                });
+                newRows.push(rows);
+              });
+            }else{
+              var rawData =[];
+              for(var n = 0;n<40;n++){
+                rawData.push([recipeNo,'',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
+                recipeNo += 1;
+              }
+              newRows.push(rawData);
+            }
+          }
+        }
+        var rawData =[];
+        for(recipeNo;recipeNo<4001;recipeNo++){
+          rawData.push([recipeNo,'',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
+        }
+        newRows.push(rawData);
+
+        let csvContent = newheader.map(e => e.join("\t")).join("\t\n") + '\n' + newRows.flat(1).map(e => e.join("\t")).join("\t\n");
+        newheader = csvContent.replace(/\s\s*$/gm, "");
+        newheader = eol.crlf(newheader);
+        var utf16buffer = Buffer.from(`\ufeff${newheader}`, 'utf16le');
+        fs.writeFileSync(dir+'/RB0.CSV', utf16buffer);
+        arr.push(cloudtime);
+        localDB.set('Update',arr);
+
+        console.log("RB0 get");
+        await getRB1();
+        await getRB2();
+      }
+      setTimeout(getRB0,60000);
+    }
+
+    async function getRB1(){
+      const eol = require('eol');
+      var cat = await getCategory(),
+       recipeNo = 1,
+       catRow = [['No.','大項名稱','大項 有效']],
+       newheader = [];
+
+      cat.map(function(item,index){
+        catRow.push([recipeNo,item,1]);
+        recipeNo += 1;
       });
 
-      // cheeck timestamp with local file
-      console.log("cloud time "+cloudtime);
-      
-      // if local time < cloud time update recipe
-      if(localtime && localtime<cloudtime){
-        // get all subcollection title(id)
-        var recipeNo = 1;
-        var subcol = [];
-        const cloudfunction = await firebase.functions().httpsCallable('getSubCollections');
-        await cloudfunction({docPath:'recipes/'+brandL}).then(result => {
-          // console.log(result.data.collections);
-          for(y in result.data.collections){
-            subcol[y] = result.data.collections[y];
-          }
-        });
-        // save header
-        var utf16buffers = Buffer.from(`\ufeff${header}`, 'utf16le');
-        await fs.writeFileSync(dir+'test-utf16le.txt', utf16buffers);
-        // get all recipe by subcollection title(id)
-        const recipefunction = await firebase.functions().httpsCallable('getRecipe');
-        var rows = [];
-        for(z in subcol){
-          await recipefunction({docPath:'recipes/'+brandL,drink:subcol[z]}).then(result => {
-            // console.log(result.data.id);
-            // console.log(result.data.recipe);
-            rows = result.data.recipe.slice(0,-1);// .join("\n");
-            rows.map(function(item,index){
-              item.unshift(recipeNo,subcol[z]);
-              // console.log(item);
-              recipeNo += 1;
-            });
-            rows = rows.join("\n");
-            var utf16buffer = Buffer.from(`${rows}`, 'utf16le');
-            fs.appendFile(dir+'test-utf16le.txt',"\n"+utf16buffer, function (err){
-              if (err) throw err;
-              console.log('Saved!');
-            });
-          });
-        }
-        await fs.rename(dir+'test-utf16le.txt', dir+'/Recipes.csv', (err) => {
-          if(err) throw err;
-          console.log('Rename complete!');
-          updateTextFile(dir+'/latest.txt',cloudtime,fs);
-        });
+      for(var x=catRow.length; x<11;x++){
+        catRow.push([recipeNo,"大項"+recipeNo,0]);
+        recipeNo += 1;
       }
-      setTimeout(checkRecipe,60000); // inifite check/ 60000 = 60s
+
+      let csvContent = catRow.map(e => e.join("\t")).join("\t\n");
+      newheader = csvContent.replace(/\s\s*$/gm, "");
+      newheader = eol.crlf(newheader);
+      var utf16buffer = Buffer.from(`\ufeff${newheader}`, 'utf16le');
+      fs.writeFileSync(dir+'/RB1.CSV', utf16buffer);
+      console.log("RB1 get");
+    }
+    
+    async function getRB2(){
+      const eol = require('eol');
+      var newheader = [],
+       recipeNo = 1,
+        drinkRow = [['No.','子項名稱','子項 有效','大杯 有效','中杯 有效','無配料 有效','1份配料 有效','2份配料 有效','3份配料 有效','正常冰 有效','少冰 有效','去冰 有效','溫 有效','熱 有效']],
+        drinks = await getDrinkList();
+
+      let csvContent = drinkRow.map(e => e.join("\t")).join("\t\n") + '\n' + drinks.map(e => e.join("\t")).join("\t\n");
+      newheader = csvContent.replace(/\s\s*$/gm, "");
+      newheader = eol.crlf(newheader);
+      var utf16buffer = Buffer.from(`\ufeff${newheader}`, 'utf16le');
+      fs.writeFileSync(dir+'/RB2.CSV', utf16buffer);
+      console.log("RB2 get");
+    }
+
+    async function getCategory(){
+      const getCategory = firebase.functions().httpsCallable('getCategory');
+      var [catName,catOff] = [[],[]];
+      await getCategory({docPath:'recipes/'+brandL}).then(result => {
+        catName = result.data.catOn;
+        catOff = result.data.catOff;
+      });
+      return catName;
+    }
+
+    async function getDrinkList(){
+      const getDrinkList = firebase.functions().httpsCallable('getDrinkList');
+      var [drinks,name,opt] = [[],[],[]];
+      await getDrinkList({docPath:'recipes/'+brandL}).then(result => {
+        name = result.data.name;
+        opt = result.data.opt;
+      });
+      var no = 1;
+      for(o in opt){
+        var x = Math.floor(opt[o]["no"]/400)+1,
+         y = opt[parseInt(o)+1];
+        drinks.push([no,name[o],opt[o]["on"],opt[o]["L"],opt[o]["M"],opt[o]["topping"],opt[o]["ice"]].flat());
+        no++;
+        if(typeof y !== 'undefined'){
+          if(x !== Math.floor(y["no"]/400)+1){
+            for(var n=no%10; n<11; n++){
+              drinks.push([no,"",0,1,1,1,1,1,1,1,1,1,1,1]);
+              no++;
+            }
+          }
+        }
+      }
+      for(no; no<101; no++){
+        drinks.push([no,"",0,1,1,1,1,1,1,1,1,1,1,1]);
+      }
+      return drinks;
+    }
+
+    async function getCategoryDrink(cat){
+      const getCategoryDrink = firebase.functions().httpsCallable('getCategoryDrink');
+      var onDrink = [];
+      await getCategoryDrink({docPath:'recipes/'+brandL, category:cat}).then(result => {
+        onDrink = result.data.onDrink;
+        // console.log(onDrink.length,offDrink.length);
+      });
+      return onDrink;
     }
 
     function readTextFile(file){
@@ -228,12 +328,103 @@
       rawFile.onreadystatechange = function (){
         if(rawFile.readyState === 4){
           if(rawFile.status === 200 || rawFile.status == 0){
-            allText = rawFile.responseText.split("\n");
+            allText = rawFile.responseText.split("\n"); // "\n" /\s+/
           }
         }
       }
       rawFile.send(null);
       return allText;
+    }
+
+    async function writecsv(){
+      const eol = require('eol');
+      var header = readTextFile(dir+"/Recipe_DT-S-CT.CSV").splice(0,1);
+      var rows = [];
+      var newRow = [];
+      for(var x=1; x<2001; x++){
+        newRow = [0,'','',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+        rows.push(newRow);
+      }
+      let csvContent = rows.map(e => e.join("\t")).join("\t\n");
+      header += csvContent.replace(/\s\s*$/gm, "");
+      header = eol.crlf(header);
+      var utf16buffer = Buffer.from(`\ufeff${header}`, 'utf16le');
+      await fs.writeFileSync(dir+'/Recipe_DT-S-CT.CSV', utf16buffer);
+    }
+
+    async function uploadStats(){
+      var today = new Date(),
+       dd = String(today.getDate()).padStart(2, '0'),
+       mm = String(today.getMonth() + 1).padStart(2, '0'),
+       yyyy = today.getFullYear();
+      today = yyyy + mm + dd;
+
+      var statsFile = readTextFile(dir+"/stats.csv"); // .splice(0,1);
+      var y = [];
+      for(var x = 0; x<statsFile.length; x++){
+        var z = statsFile[x].split(/\s+/);
+        if(x+1 <= statsFile.length){ // *remove supply code
+          z.pop(); // .splice(-1,1)
+        }
+        y.push(z);
+      }
+      for(var i=0;i<32;i++){
+        y[0][i] = y[0][i] + " " + y[0][i+1];
+        y[0].splice(i+1,1);
+        if(i ==0){i = 5;}
+        else if(i ==9){i = 29;y[0].pop();}
+      }
+      for(var x = 1; x<y.length;x++){
+        var a = Math.floor(Math.random()*(y[x].length - 3) + 3),
+         b =  Math.floor(Math.random()*(5000 - 100) + 100);
+        y[x][a] = (parseInt(y[x][a]) + b).toString();
+      }
+      console.log(y);
+      // for(var x =20210701; x<=20210731; x++){
+      //   const cloudfunction = await firebase.functions().httpsCallable('addMachineStats');
+      //   await cloudfunction({docPath:'stats/'+brandL,uploadDate:x.toString(),addStats:y}).then(result => {
+      //     console.log(result.data.msg);
+      //   });
+      // }
+      
+      const cloudfunction = await firebase.functions().httpsCallable('addMachineStats');
+      await cloudfunction({docPath:'stats/'+brandL,uploadDate: today,addStats:y}).then(result => {
+        console.log(result.data.msg);
+      });
+      // setTimeout(uploadStats,60000);
+    }
+
+    async function dbJson(){
+      //dt 2 1 21 08 001 //drinktec 雙 茶桶架 年 月 編號
+      if(localDB.has('Machine ID')){
+        console.log(localDB.JSON());
+        $('.contentSetup').empty();
+        $('#machineID').text(localDB.get('Machine ID'));
+        $('#brand').text(localDB.get('Brand name'));
+        $('#store').text(localDB.get('Store location'));
+        $('#modelname').text(localDB.get('Model name'));
+        $('#made').text(localDB.get('Made'));
+        $('.contentDetails').show();
+      }else{
+        var html = '<p><label>Machine ID: </label><input type="text" id="inputID"></p>';
+          html += '<p><label>Brand name: </label><input type="text" id="inputBrand"></p>';
+          html += '<p><label>Store location: </label><input type="text" id="inputLocation"></p>';
+          html += '<p><label>Model name: </label><input type="text" id="inputModel"></p>';
+          html += '<p><label>Made: </label><input type="text" id="inputMade"></p>';
+          html += '<button id="setUp"> Submit </button>';
+        $('.contentSetup').append(html);
+        $('#setUp').on('click',function(){
+          localDB.set('Machine ID',$('#inputID').val());
+          localDB.set('Brand name',$('#inputBrand').val());
+          localDB.set('Store location',$('#inputLocation').val());
+          localDB.set('Model name',$('#inputModel').val());
+          localDB.set('Made',$('#inputMade').val());
+          localDB.set('Update',[$('#inputMade').val()]);
+          console.log("Created");
+          dbJson();
+          $('.contentSetup').empty();
+        });
+      }
     }
   </script>
 </body>
