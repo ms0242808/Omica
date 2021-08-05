@@ -169,6 +169,8 @@
     
     getRB0();
     async function getRB0(){
+      var arr = localDB.get('Update'),
+       localtime = arr[arr.length - 1];
       const eol = require('eol');
       var cloudtime = '';
       var header,newheader = [];
