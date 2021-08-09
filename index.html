@@ -142,7 +142,8 @@
      electron = require('electron'),
      path = require('path'),
      app = require('electron').remote.app,
-     dir = "C:\\drinktec"// app.getPath('desktop').toString()+'/DrinkTec';
+     dir = "C:\\drinktec";
+    //  dir = app.getPath('desktop').toString()+'/DrinkTec';
     
     dbJson();
     var arr = localDB.get('Update'),
@@ -174,17 +175,18 @@
        localtime = arr[arr.length - 1];
       const eol = require('eol');
       var cloudtime = '';
-      var header,newheader = [];
+      var newheader = [];
       const recipeThfunction = await firebase.functions().httpsCallable('getRecipeHeader');
       await recipeThfunction({docPath:'recipes/'+brandL}).then(result => {
-        for(x in result.data.header){
-          // console.log(result.data.header[x]);
-          header = result.data.header.slice(1,-1);// remove first and last item
-        }
-        header.unshift("Recipe No.","Item");
-        newheader.push(header);
         cloudtime = result.data.timestamp;
       });
+
+      newheader.push(["Recipe No.","Item","Size","Temperature","Topping","Ice",
+          "sugar100","sugar70","sugar50","sugar30","milk1","milk2",
+          "tea1","tea2","tea3","tea4","tea5","tea6","tea7","tea8","tea9","tea10",
+          "j1","j2","j3","j4","j5","j6","j7","j8",
+          "coldwater","hotwater","shake","supplycode"]);
+
       if(localtime && localtime<cloudtime){
         var cat = await getCategory(),
          recipeNo = 1,
@@ -226,12 +228,14 @@
         newheader = eol.crlf(newheader);
         var utf16buffer = Buffer.from(`\ufeff${newheader}`, 'utf16le');
         fs.writeFileSync(dir+'/RB0.CSV', utf16buffer);
-        arr.push(cloudtime);
-        localDB.set('Update',arr);
 
         console.log("RB0 get");
         await getRB1();
         await getRB2();
+
+        arr.push(cloudtime);
+        localDB.set('Update',arr);
+        $('#update').text(cloudtime);
       }else{
         console.log("Updated");
       }
