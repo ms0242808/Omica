@@ -409,7 +409,8 @@
         $('#store').text(localDB.get('Store location'));
         $('#modelname').text(localDB.get('Model name'));
         $('#made').text(localDB.get('Made'));
-        $('#update').text(localDB.get('Update'));
+        var arr = localDB.get('Update');
+        $('#update').text(arr[arr.length - 1]);
         $('.contentDetails').show();
       }else{
         var html = '<p><label>Machine ID: </label><input type="text" id="inputID"></p>';
