@@ -43,6 +43,7 @@
     <div class="pt"><a>Model name: <a id="modelname"></a></a><br/></div>
     <div class="pt"><a>Manufuture: Drinktec</a><br/></div>
     <div class="pt"><a>Made: <a id="made"></a></a><br/></div>
+    <div class="pt"><a>Recipe version: <a id="update"></a></a><br/></div>
   </div>
   <br>
   <div class="pt"><a id="status" style="text-transform: uppercase; font-weight:bold;"></a><br/></div>
@@ -70,6 +71,7 @@
       // firebase.functions().useFunctionsEmulator("http://localhost:5001");
       // db2.useEmulator("localhost", 8080);
     // // }
+    dbJson();
 
     function updateTextFile(file,updateT,fs){
       var utf16buffer = Buffer.from(`${updateT}`, 'ascii');
@@ -141,9 +143,9 @@
      electron = require('electron'),
      path = require('path'),
      app = require('electron').remote.app,
-     dir = "'C:\drinktec'"// app.getPath('desktop').toString()+'/DrinkTec';
+     dir = "C:\\drinktec"// app.getPath('desktop').toString()+'/DrinkTec';
     
-    dbJson();
+    
     var arr = localDB.get('Update'),
      localtime = arr[arr.length - 1];
     console.log('app:',app.getAppPath());
@@ -408,6 +410,7 @@
         $('#store').text(localDB.get('Store location'));
         $('#modelname').text(localDB.get('Model name'));
         $('#made').text(localDB.get('Made'));
+        $('#update').text(localDB.get('Update'));
         $('.contentDetails').show();
       }else{
         var html = '<p><label>Machine ID: </label><input type="text" id="inputID"></p>';
