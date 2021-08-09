@@ -71,7 +71,6 @@
       // firebase.functions().useFunctionsEmulator("http://localhost:5001");
       // db2.useEmulator("localhost", 8080);
     // // }
-    dbJson();
 
     function updateTextFile(file,updateT,fs){
       var utf16buffer = Buffer.from(`${updateT}`, 'ascii');
@@ -145,7 +144,7 @@
      app = require('electron').remote.app,
      dir = "C:\\drinktec"// app.getPath('desktop').toString()+'/DrinkTec';
     
-    
+    dbJson();
     var arr = localDB.get('Update'),
      localtime = arr[arr.length - 1];
     console.log('app:',app.getAppPath());
