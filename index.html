@@ -370,8 +370,9 @@
        today = yyyy + mm + dd,
        time = hr+min+sec;
       if (fs.existsSync(dir+"/LOG.csv")){
-        console.log("Log file found");
-        var statsFile = readTextFile(dir+"/LOG.csv"); // .splice(0,1);
+        fs.renameSync(dir+"/LOG.csv",dir+"/UpLOG.csv");
+        console.log("Log file found and renamed");
+        var statsFile = readTextFile(dir+"/UpLOG.csv"); // .splice(0,1);
         var y = [];
         for(var x = 0; x<statsFile.length; x++){
           var z = statsFile[x].split(/\s+/);
@@ -396,13 +397,13 @@
         const cloudfunction = await firebase.functions().httpsCallable('addMachineStats');
         await cloudfunction({docPath:'stats/'+brandL,uploadDate:today,uploadTime:time,addStats:y}).then(result => {
           console.log("Stats upload",result.data.msg,"at",today,time);
-          fs.unlinkSync(dir+"/LOG.csv");
+          fs.unlinkSync(dir+"/UpLOG.csv");
           console.log("File deleted");
         });
       }else{
         console.log("Log file not found");
       }
-      setTimeout(uploadStats,60000);
+      setTimeout(uploadStats,180000);
     }
 
     async function dbJson(){
