@@ -49,9 +49,6 @@
   <div class="pt"><a id="status" style="text-transform: uppercase; font-weight:bold;"></a><br/></div>
   <p id="version"></p>
   <span>Copyright &copy; DRINKTEC</span>
-  <button id="s" onClick="uploadStats()">
-    upload Stats
-  </button>
   <!-- <button id="ss" onClick="dbJson()">
     upload File
   </button> -->
@@ -143,7 +140,7 @@
      path = require('path'),
      app = require('electron').remote.app,
      dir = "C:\\drinktec";
-    //  dir = app.getPath('desktop').toString()+'/DrinkTec';
+    //  dir = app.getPath('desktop').toString()+'/drinktec';
     
     dbJson();
     var arr = localDB.get('Update'),
@@ -365,42 +362,46 @@
       var today = new Date(),
        dd = String(today.getDate()).padStart(2, '0'),
        mm = String(today.getMonth() + 1).padStart(2, '0'),
-       yyyy = today.getFullYear();
-      today = yyyy + mm + dd;
-
-      var statsFile = readTextFile(dir+"/stats.csv"); // .splice(0,1);
-      var y = [];
-      for(var x = 0; x<statsFile.length; x++){
-        var z = statsFile[x].split(/\s+/);
-        if(x+1 <= statsFile.length){ // *remove supply code
-          z.pop(); // .splice(-1,1)
+       yyyy = today.getFullYear(),
+       hr = String(today.getHours()).padStart(2, '0'),
+       min = String(today.getMinutes()).padStart(2, '0'),
+       sec = String(today.getSeconds()).padStart(2, '0');
+       today = yyyy + mm + dd,
+       time = hr+min+sec;
+      if (fs.existsSync(dir+"/LOG.csv")){
+        console.log("Log file found");
+        var statsFile = readTextFile(dir+"/LOG.csv"); // .splice(0,1);
+        var y = [];
+        for(var x = 0; x<statsFile.length; x++){
+          var z = statsFile[x].split(/\s+/);
+          if(x+1 <= statsFile.length){ // *remove supply code
+            z.pop(); // .splice(-1,1)
+          }
+          y.push(z);
         }
-        y.push(z);
+        // for(var i=0;i<32;i++){
+        //   y[0][i] = y[0][i] + " " + y[0][i+1];
+        //   y[0].splice(i+1,1);
+        //   if(i ==0){i = 5;}
+        //   else if(i ==9){i = 29;y[0].pop();}
+        // }
+        for(var x = 1; x<y.length;x++){
+          var a = Math.floor(Math.random()*(y[x].length - 3) + 3),
+          b =  Math.floor(Math.random()*(5000 - 100) + 100);
+          y[x][a] = (parseInt(y[x][a]) + b).toString();
+        }
+        y.pop();
+        console.log(y);
+        const cloudfunction = await firebase.functions().httpsCallable('addMachineStats');
+        await cloudfunction({docPath:'stats/'+brandL,uploadDate:today,uploadTime:time,addStats:y}).then(result => {
+          console.log("Stats upload",result.data.msg,"at",today,time);
+          fs.unlinkSync(dir+"/LOG.csv");
+          console.log("File deleted");
+        });
+      }else{
+        console.log("Log file not found");
       }
-      for(var i=0;i<32;i++){
-        y[0][i] = y[0][i] + " " + y[0][i+1];
-        y[0].splice(i+1,1);
-        if(i ==0){i = 5;}
-        else if(i ==9){i = 29;y[0].pop();}
-      }
-      for(var x = 1; x<y.length;x++){
-        var a = Math.floor(Math.random()*(y[x].length - 3) + 3),
-         b =  Math.floor(Math.random()*(5000 - 100) + 100);
-        y[x][a] = (parseInt(y[x][a]) + b).toString();
-      }
-      console.log(y);
-      // for(var x =20210701; x<=20210731; x++){
-      //   const cloudfunction = await firebase.functions().httpsCallable('addMachineStats');
-      //   await cloudfunction({docPath:'stats/'+brandL,uploadDate:x.toString(),addStats:y}).then(result => {
-      //     console.log(result.data.msg);
-      //   });
-      // }
-      
-      const cloudfunction = await firebase.functions().httpsCallable('addMachineStats');
-      await cloudfunction({docPath:'stats/'+brandL,uploadDate: today,addStats:y}).then(result => {
-        console.log(result.data.msg);
-      });
-      // setTimeout(uploadStats,60000);
+      setTimeout(uploadStats,60000);
     }
 
     async function dbJson(){
