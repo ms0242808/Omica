@@ -3,6 +3,7 @@
   <title>OMICA</title>
   <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-functions.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-storage.js"></script>
   <script src="fire.js"></script>
@@ -66,6 +67,8 @@
     // // if(location.hostname === "localhost"){
       // var db2 = firebase.firestore();
       // firebase.functions().useFunctionsEmulator("http://localhost:5001");
+      // var db3 = firebase.database();
+      // db3.useEmulator("localhost", 9000);
       // db2.useEmulator("localhost", 8080);
     // // }
 
@@ -165,7 +168,8 @@
         poweroff();
       }
     }
-    
+
+    onoff();
     getRB0();
     uploadStats();
     async function getRB0(){
@@ -434,6 +438,26 @@
           $('.contentSetup').empty();
         });
       }
+    }
+    
+    async function onoff(){
+      var statusDB = firebase.database().ref('/status/'+brandL),
+       offDB = {
+          state: 'offline',
+          last_changed: firebase.database.ServerValue.TIMESTAMP,
+        },
+       onDB = {
+          state: 'online',
+          last_changed: firebase.database.ServerValue.TIMESTAMP,
+        };
+      firebase.database().ref('.info/connected').on('value',function(snapshot){
+        if(snapshot.val() == false){// If we're not currently connected, don't do anything.
+          return;
+        };
+        statusDB.onDisconnect().set(offDB).then(function(){
+          statusDB.set(onDB);
+        });
+      });
     }
   </script>
 </body>
