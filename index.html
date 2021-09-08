@@ -112,15 +112,6 @@
       notification.classList.remove('hidden');
       $('#restart-button').trigger( "click" );
     });
-
-    function updateOnlineStatus(){
-      var x = navigator.onLine ? 'online' : 'offline';
-      status.className = x;
-      status.innerHTML = x.toUpperCase();
-    }
-    window.addEventListener('online', updateOnlineStatus);
-    window.addEventListener('offline', updateOnlineStatus);
-    updateOnlineStatus();
     
     // checkLicense();
     
@@ -324,11 +315,11 @@
 
     async function getCategoryDrink(cat){
       const getCategoryDrink = firebase.functions().httpsCallable('getCategoryDrink');
-      var onDrink = [];
-      await getCategoryDrink({docPath:'recipes/'+brandL, category:cat}).then(result => {
-        onDrink = result.data.onDrink;
-        // console.log(onDrink.length,offDrink.length);
+      var [onDrink,sorted] = [[],[]];
+      await getCategoryDrink({docPath:'recipes/'+brandL,category:cat}).then(result => {
+        sorted = Object.entries(result.data.order).sort((a,b) => a[1] - b[1]);
       });
+      for(x in sorted){onDrink[x]=sorted[x][0]}
       return onDrink;
     }
 
@@ -452,10 +443,14 @@
         };
       firebase.database().ref('.info/connected').on('value',function(snapshot){
         if(snapshot.val() == false){// If we're not currently connected, don't do anything.
+          status.className = offDB.state;
+          status.innerHTML = offDB.state.toUpperCase();
           return;
         };
         statusDB.onDisconnect().set(offDB).then(function(){
           statusDB.set(onDB);
+          status.className = onDB.state;
+          status.innerHTML = onDB.state.toUpperCase();
         });
       });
     }
