@@ -1,6 +1,6 @@
 {
   "name": "omica",
-  "version": "2021.36.3",
+  "version": "2021.39.1",
   "description": "Omica software provided by DRINKTEC",
   "main": "index.js",
   "scripts": {

@@ -364,7 +364,7 @@
        sec = String(today.getSeconds()).padStart(2, '0');
        today = yyyy + mm + dd,
        time = hr+min+sec;
-      if (fs.existsSync(dir+"/LOG.csv")){
+      if(fs.existsSync(dir+"/LOG.csv")){
         fs.renameSync(dir+"/LOG.csv",dir+"/UpLOG.csv");
         console.log("Log file found and renamed");
         var statsFile = readTextFile(dir+"/UpLOG.csv"); // .splice(0,1);
@@ -384,12 +384,25 @@
         // }
         y.pop();
         console.log(y);
-        const cloudfunction = await firebase.functions().httpsCallable('addMachineStats');
-        await cloudfunction({docPath:'stats/'+brandL,uploadDate:today,uploadTime:time,addStats:y}).then(result => {
-          console.log("Stats upload",result.data.msg,"at",today,time);
-          fs.unlinkSync(dir+"/UpLOG.csv");
-          console.log("File deleted");
-        });
+        var groupVal = [];
+        groupVal.push(y[0]);
+        for(var n=1;n<y.length;n++){
+          if(y[n+1] && y[n][0]==y[n+1][0]){
+            groupVal.push(y[n]);
+          }else{
+            groupVal.push(y[n]);
+            console.log(y[n][0],y[n][1],groupVal);
+            var dVal = y[n][0].split('/');
+            const cloudfunction = await firebase.functions().httpsCallable('addMachineStats');
+            await cloudfunction({docPath:'stats/'+brandL,uploadDate:"20"+dVal[0]+dVal[1]+dVal[2],uploadTime:time,addStats:groupVal}).then(result => {
+              console.log("Stats upload",result.data.msg,"at",today,time);
+            });
+            groupVal = [];
+            groupVal.push(y[0]);
+          }
+        }
+        fs.unlinkSync(dir+"/UpLOG.csv");
+        console.log("File deleted");
       }else{
         console.log("Log file not found");
       }
