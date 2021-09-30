@@ -35,7 +35,7 @@
   </style>
 </head>
 <body>
-  <h1>OMICA Software</h1>
+  <h1>OMICA+</h1>
   <div class="contentSetup"></div>
   <div class="contentDetails" hidden>
     <div class="pt"><a>Machine ID: <a id="machineID"></a></a><br/></div>
@@ -356,13 +356,9 @@
 
     async function uploadStats(){
       var today = new Date(),
-       dd = String(today.getDate()).padStart(2, '0'),
-       mm = String(today.getMonth() + 1).padStart(2, '0'),
-       yyyy = today.getFullYear(),
        hr = String(today.getHours()).padStart(2, '0'),
        min = String(today.getMinutes()).padStart(2, '0'),
-       sec = String(today.getSeconds()).padStart(2, '0');
-       today = yyyy + mm + dd,
+       sec = String(today.getSeconds()).padStart(2, '0')
        time = hr+min+sec;
       if(fs.existsSync(dir+"/LOG.csv")){
         fs.renameSync(dir+"/LOG.csv",dir+"/UpLOG.csv");
