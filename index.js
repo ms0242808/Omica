@@ -4,6 +4,7 @@ var AutoLaunch = require('auto-launch');
 const log = require('electron-log');
 
 let mainWindow;
+const updateCheck = false;
 
 function createWindow () {
   mainWindow = new BrowserWindow({
@@ -19,13 +20,14 @@ function createWindow () {
     mainWindow = null;
   });
   mainWindow.once('ready-to-show', () => {
-    autoUpdateCheck();
+    autoUpdateCheck(updateCheck);
   });
 }
 
 autoUpdater.logger = log;
 log.info('App starting...');    
 autoUpdater.on('download-progress', (progressObj) => {
+  updateCheck = true;
   let log_message = ' - Downloaded ' + Math.round(progressObj.percent) + '%';
   log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
   sendStatusToWindow(log_message);
@@ -36,14 +38,16 @@ function sendStatusToWindow(text) {
   mainWindow.webContents.send('message', text);
 }
 
-function autoUpdateCheck(){
-  autoUpdater.checkForUpdatesAndNotify();
+function autoUpdateCheck(updateCheck){
+  if(!updateCheck){
+    autoUpdater.checkForUpdatesAndNotify();
+  }
   setTimeout(autoUpdateCheck,60000);
 }
 
 app.on('ready', () => {
   createWindow();
-  // mainWindow.close();
+  mainWindow.minimize();
 });
 
 app.on('window-all-closed', function () {

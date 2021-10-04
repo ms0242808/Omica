@@ -1,6 +1,6 @@
 {
   "name": "omica",
-  "version": "2021.39.2",
+  "version": "2021.40.1",
   "description": "Omica software provided by DRINKTEC",
   "main": "index.js",
   "scripts": {
@@ -12,6 +12,15 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/ms0242808/Omica.git"
+  },
+  "build": {
+    "mac": {
+      "icon": "./icons/fav.icns",
+      "category": "public.app-category.utilities"
+    },
+    "win": {
+      "icon": "./icons/fav.png"
+    }
   },
   "author": "DRINKTEC LTD.",
   "license": "ISC",
