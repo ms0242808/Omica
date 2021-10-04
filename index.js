@@ -62,10 +62,12 @@ function sendStatusToWindow(text) {
 }
 
 function autoUpdateCheck(updateCheck){
-  if(!updateCheck){
-    autoUpdater.checkForUpdatesAndNotify();
-  }
-  setTimeout(autoUpdateCheck,60000);
+  autoUpdater.checkForUpdatesAndNotify();
+  setTimeout(function(){
+    if(!updateCheck){
+      autoUpdateCheck();
+    }
+  },60000);
 }
 
 app.on('ready', () => {
