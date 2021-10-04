@@ -13,7 +13,8 @@ function createWindow () {
     webPreferences: {
       enableRemoteModule: true,
       nodeIntegration: true,
-    }
+    },
+    icon: __dirname + '/icons/favicon.ico',
   });
   mainWindow.loadFile('index.html');
   mainWindow.on('closed', function () {

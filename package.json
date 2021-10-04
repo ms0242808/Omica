@@ -13,11 +13,6 @@
     "type": "git",
     "url": "https://github.com/ms0242808/Omica.git"
   },
-  "build": {
-    "win": {
-      "icon": "./icons/favicon.png"
-    }
-  },
   "author": "DRINKTEC LTD.",
   "license": "ISC",
   "bugs": {
