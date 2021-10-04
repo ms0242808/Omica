@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Tray, Menu} = require('electron');
+const { app, BrowserWindow, ipcMain} = require('electron');
 const { autoUpdater } = require('electron-updater');
 var AutoLaunch = require('auto-launch');
 const log = require('electron-log');
@@ -18,28 +18,12 @@ function createWindow () {
     icon: iconpath,
   });
   mainWindow.loadFile('index.html');
-  var appIcon = new Tray('./pic/16x16.ico');
-  var contextMenu = Menu.buildFromTemplate([
-    { label: 'Show App', click:  function(){
-      mainWindow.show();
-    } },
-    { label: 'Quit', click:  function(){
-      app.isQuiting = true;
-      app.quit();
-    } }
-  ]);
-  appIcon.setContextMenu(contextMenu);
   mainWindow.on('minimize',function(event){
     event.preventDefault();
     mainWindow.hide();
   });
   mainWindow.on('closed', function (event) {
     mainWindow = null;
-    // if (!app.isQuiting) {
-    //   event.preventDefault();
-    //   mainWindow.hide();
-    //   event.returnValue = false;
-    // }
   });
   
   mainWindow.once('ready-to-show', () => {
@@ -64,9 +48,7 @@ function sendStatusToWindow(text) {
 function autoUpdateCheck(updateCheck){
   autoUpdater.checkForUpdatesAndNotify();
   setTimeout(function(){
-    if(!updateCheck){
-      autoUpdateCheck();
-    }
+    if(!updateCheck){autoUpdateCheck();}
   },60000);
 }
 
