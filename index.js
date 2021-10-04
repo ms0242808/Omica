@@ -17,10 +17,7 @@ function createWindow () {
     icon: iconpath,
   });
   mainWindow.loadFile('index.html');
-  mainWindow.on('minimize',function(event){
-    event.preventDefault();
-    mainWindow.hide();
-  });
+  
   mainWindow.on('closed', function (event) {
     mainWindow = null;
   });
