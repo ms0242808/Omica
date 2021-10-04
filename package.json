@@ -15,11 +15,11 @@
   },
   "build": {
     "mac": {
-      "icon": "./icons/fav.icns",
+      "icon": "./icons/favicon.icns",
       "category": "public.app-category.utilities"
     },
     "win": {
-      "icon": "./icons/fav.png"
+      "icon": "./icons/favicon.png"
     }
   },
   "author": "DRINKTEC LTD.",
