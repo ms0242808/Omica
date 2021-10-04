@@ -4,7 +4,6 @@ var AutoLaunch = require('auto-launch');
 const log = require('electron-log');
 
 let mainWindow;
-const updateCheck = false;
 var iconpath = './pic/favicon.ico';
 
 function createWindow () {
@@ -27,14 +26,13 @@ function createWindow () {
   });
   
   mainWindow.once('ready-to-show', () => {
-    autoUpdateCheck(updateCheck);
+    autoUpdateCheck();
   });
 }
 
 autoUpdater.logger = log;
 log.info('App starting...');    
 autoUpdater.on('download-progress', (progressObj) => {
-  updateCheck = true;
   let log_message = ' - Downloaded ' + Math.round(progressObj.percent) + '%';
   log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
   sendStatusToWindow(log_message);
@@ -45,11 +43,9 @@ function sendStatusToWindow(text) {
   mainWindow.webContents.send('message', text);
 }
 
-function autoUpdateCheck(updateCheck){
+function autoUpdateCheck(){
   autoUpdater.checkForUpdatesAndNotify();
-  setTimeout(function(){
-    if(!updateCheck){autoUpdateCheck();}
-  },60000);
+  setTimeout(autoUpdateCheck,60000);
 }
 
 app.on('ready', () => {
