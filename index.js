@@ -47,7 +47,7 @@ function autoUpdateCheck(){
 
 app.on('ready', () => {
   createWindow();
-  mainWindow.minimize();
+  setTimeout(function(){mainWindow.minimize()},2000);
 });
 
 app.on('window-all-closed', function () {
