@@ -1,10 +1,11 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, Tray, Menu} = require('electron');
 const { autoUpdater } = require('electron-updater');
 var AutoLaunch = require('auto-launch');
 const log = require('electron-log');
 
 let mainWindow;
 const updateCheck = false;
+var iconpath = './pic/favicon.ico';
 
 function createWindow () {
   mainWindow = new BrowserWindow({
@@ -13,12 +14,34 @@ function createWindow () {
     webPreferences: {
       enableRemoteModule: true,
       nodeIntegration: true,
-    }
+    },
+    icon: iconpath,
   });
   mainWindow.loadFile('index.html');
-  mainWindow.on('closed', function () {
-    mainWindow = null;
+  var appIcon = new Tray('./pic/16x16.ico');
+  var contextMenu = Menu.buildFromTemplate([
+    { label: 'Show App', click:  function(){
+      mainWindow.show();
+    } },
+    { label: 'Quit', click:  function(){
+      app.isQuiting = true;
+      app.quit();
+    } }
+  ]);
+  appIcon.setContextMenu(contextMenu);
+  mainWindow.on('minimize',function(event){
+    event.preventDefault();
+    mainWindow.hide();
   });
+  mainWindow.on('closed', function (event) {
+    mainWindow = null;
+    // if (!app.isQuiting) {
+    //   event.preventDefault();
+    //   mainWindow.hide();
+    //   event.returnValue = false;
+    // }
+  });
+  
   mainWindow.once('ready-to-show', () => {
     autoUpdateCheck(updateCheck);
   });
