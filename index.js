@@ -20,12 +20,12 @@ function createWindow () {
   });
   mainWindow.loadFile('index.html');
   
-  mainWindow.on('closed', function (event) {
+  mainWindow.on('closed',function(event){
     mainWindow = null;
   });
   
   mainWindow.once('ready-to-show', () => {
-    autoUpdateCheck();
+    // autoUpdateCheck();
   });
 }
 
@@ -37,7 +37,7 @@ autoUpdater.on('download-progress', (progressObj) => {
   sendStatusToWindow(log_message);
 });
 
-function sendStatusToWindow(text) {
+function sendStatusToWindow(text){
   log.info(text);
   mainWindow.webContents.send('message', text);
 }
@@ -49,17 +49,17 @@ function autoUpdateCheck(){
 
 app.on('ready', () => {
   createWindow();
-  setTimeout(function(){mainWindow.minimize()},2000);
+  setTimeout(function(){mainWindow.minimize();autoUpdateCheck();},2000);
 });
 
-app.on('window-all-closed', function () {
-  if (process.platform !== 'darwin') {
+app.on('window-all-closed',function(){
+  if(process.platform !== 'darwin'){
     app.quit();
   }
 });
 
-app.on('activate', function () {
-  if (mainWindow === null) {
+app.on('activate', function(){
+  if(mainWindow === null){
     createWindow();
   }
 });
