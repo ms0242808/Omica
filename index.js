@@ -8,13 +8,15 @@ var iconpath = './pic/favicon.ico';
 
 function createWindow () {
   mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 300,
+    height: 460,
     webPreferences: {
       enableRemoteModule: true,
       nodeIntegration: true,
     },
     icon: iconpath,
+    autoHideMenuBar: true,
+    frame: false 
   });
   mainWindow.loadFile('index.html');
   
