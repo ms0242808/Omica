@@ -180,6 +180,7 @@
         if(localtime && localtime<cloudtime){
           $('#pullRecipe').text('Downloading...');
           var cat = await getCategory(),
+          preNo = 1,
           recipeNo = 1,
           subcol,rows,newRows = [];
           for(c in cat){
@@ -192,6 +193,8 @@
                 await recipefunction({docPath:'recipes/'+brandL,drink:drink[i].toString()}).then(result => {
                   rows = result.data.recipe.slice(0,-1);
                   recipeNo = result.data.number;
+                  if(recipeNo !== preNo){recipeNo = preNo}
+                  preNo = recipeNo + 400;
                   rows.map(function(item,index){
                     item.unshift(recipeNo,drink[i]);
                     recipeNo += 1;
@@ -338,16 +341,29 @@
       }
 
       async function uploadStats(){
-        var today = new Date(),
-        hr = String(today.getHours()).padStart(2, '0'),
-        min = String(today.getMinutes()).padStart(2, '0'),
-        sec = String(today.getSeconds()).padStart(2, '0')
-        time = hr+min+sec;
+        if(fs.existsSync(dir+"/UpLOG.csv")){
+          console.log("UpLog file found");
+          var statsFile = readTextFile(dir+"/UpLOG.csv");
+          await getStats(statsFile);
+        }
         if(fs.existsSync(dir+"/LOG.csv")){
           fs.renameSync(dir+"/LOG.csv",dir+"/UpLOG.csv");
           console.log("Log file found and renamed");
           var statsFile = readTextFile(dir+"/UpLOG.csv"); // .splice(0,1);
-          var y = [];
+          await getStats(statsFile);
+        }else{
+          console.log("Log file not found");
+        }
+        setTimeout(uploadStats,180000);
+      }
+
+      async function getStats(statsFile){
+        var today = new Date(),
+        hr = String(today.getHours()).padStart(2, '0'),
+        min = String(today.getMinutes()).padStart(2, '0'),
+        sec = String(today.getSeconds()).padStart(2, '0'),
+        time = hr+min+sec;
+        var y = [];
           for(var x = 0; x<statsFile.length; x++){
             var z = statsFile[x].split(/\s+/);
             if(x+1 <= statsFile.length){ // *remove supply code
@@ -362,7 +378,7 @@
           //   else if(i ==9){i = 29;y[0].pop();}
           // }
           y.pop();
-          console.log(y);
+          // console.log(y);
           var groupVal = [];
           groupVal.push(y[0]);
           for(var n=1;n<y.length;n++){
@@ -370,7 +386,7 @@
               groupVal.push(y[n]);
             }else{
               groupVal.push(y[n]);
-              console.log(y[n][0],y[n][1],groupVal);
+              // console.log(y[n][0],y[n][1],groupVal);
               var dVal = y[n][0].split('/');
               const cloudfunction = await firebase.functions().httpsCallable('addMachineStats');
               await cloudfunction({docPath:'stats/'+brandL,uploadDate:"20"+dVal[0]+dVal[1]+dVal[2],uploadTime:time,addStats:groupVal}).then(result => {
@@ -382,10 +398,6 @@
           }
           fs.unlinkSync(dir+"/UpLOG.csv");
           console.log("File deleted");
-        }else{
-          console.log("Log file not found");
-        }
-        setTimeout(uploadStats,180000);
       }
 
       async function dbJson(){
