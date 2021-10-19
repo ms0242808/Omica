@@ -68,7 +68,7 @@
   <script>
     // // if(location.hostname === "localhost"){
       // var db2 = firebase.firestore();
-      // firebase.functions().useFunctionsEmulator("http://localhost:5001");
+      firebase.functions().useFunctionsEmulator("http://localhost:5001");
       // var db3 = firebase.database();
       // db3.useEmulator("localhost", 9000);
       // db2.useEmulator("localhost", 8080);
@@ -130,8 +130,8 @@
       electron = require('electron'),
       path = require('path'),
       app = require('electron').remote.app,
-      dir = "C:\\drinktec";
-      // dir = app.getPath('desktop').toString()+'/drinktec';
+      // dir = "C:\\drinktec";
+      dir = app.getPath('desktop').toString()+'/drinktec';
       
       dbJson();
       var arr = localDB.get('Update'),
@@ -414,12 +414,14 @@
           $('#update').text(arr[arr.length - 1]);
           $('.contentDetails').show();
         }else{
-          var html = '<p><label>Machine ID: </label><input type="text" id="inputID"></p>';
-            html += '<p><label>Brand name: </label><input type="text" id="inputBrand"></p>';
-            html += '<p><label>Store location: </label><input type="text" id="inputLocation"></p>';
-            html += '<p><label>Model name: </label><input type="text" id="inputModel"></p>';
-            html += '<p><label>Made: </label><input type="text" id="inputMade"></p>';
-            html += '<button id="setUp"> Submit </button>';
+          var html = `<p><label>Machine ID: </label><input type="text" id="inputID"></p>
+            <p><label>Brand name: </label><input type="text" id="inputBrand"></p>
+            <p><label>Store location: </label><input type="text" id="inputLocation"></p>
+            <p><label>Model name: </label><input type="text" id="inputModel"></p>
+            <p><label>Made: </label><input type="text" id="inputMade"></p>
+            <p><label>U: </label><input type="text" id="inputUser"></p>
+            <p><label>P: </label><input type="text" id="inputPass"></p>
+            <button id="setUp"> Submit </button>`;
           $('.contentSetup').append(html);
           $('#setUp').on('click',function(){
             localDB.set('Machine ID',$('#inputID').val());
@@ -428,6 +430,8 @@
             localDB.set('Model name',$('#inputModel').val());
             localDB.set('Made',$('#inputMade').val());
             localDB.set('Update',[$('#inputMade').val()]);
+            localDB.set('user',[$('#inputUser').val()]);
+            localDB.set('pass',[$('#inputPass').val()]);
             console.log("Created");
             dbJson();
             $('.contentSetup').empty();

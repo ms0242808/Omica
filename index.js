@@ -4,7 +4,7 @@ var AutoLaunch = require('auto-launch');
 const log = require('electron-log');
 
 let mainWindow;
-var iconpath = './pic/favicon.ico';
+var iconpath = './pic/favicon.icon';
 
 function createWindow () {
   mainWindow = new BrowserWindow({
