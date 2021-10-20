@@ -68,7 +68,7 @@
   <script>
     // // if(location.hostname === "localhost"){
       // var db2 = firebase.firestore();
-      firebase.functions().useFunctionsEmulator("http://localhost:5001");
+      // firebase.functions().useFunctionsEmulator("http://localhost:5001");
       // var db3 = firebase.database();
       // db3.useEmulator("localhost", 9000);
       // db2.useEmulator("localhost", 8080);
@@ -130,8 +130,8 @@
       electron = require('electron'),
       path = require('path'),
       app = require('electron').remote.app,
-      // dir = "C:\\drinktec";
-      dir = app.getPath('desktop').toString()+'/drinktec';
+      dir = "C:\\drinktec";
+      // dir = app.getPath('desktop').toString()+'/drinktec';
       
       dbJson();
       var arr = localDB.get('Update'),
