@@ -378,7 +378,6 @@
           //   else if(i ==9){i = 29;y[0].pop();}
           // }
           y.pop();
-          // console.log(y);
           var groupVal = [];
           groupVal.push(y[0]);
           for(var n=1;n<y.length;n++){
@@ -386,7 +385,6 @@
               groupVal.push(y[n]);
             }else{
               groupVal.push(y[n]);
-              // console.log(y[n][0],y[n][1],groupVal);
               var dVal = y[n][0].split('/');
               const cloudfunction = await firebase.functions().httpsCallable('addMachineStats');
               await cloudfunction({docPath:'stats/'+brandL,uploadDate:"20"+dVal[0]+dVal[1]+dVal[2],uploadTime:time,addStats:groupVal}).then(result => {
