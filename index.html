@@ -448,6 +448,7 @@
         onDB = {
             state: 'online',
             last_changed: firebase.database.ServerValue.TIMESTAMP,
+            onTime: firebase.database.ServerValue.TIMESTAMP
           };
         firebase.database().ref('.info/connected').on('value',function(snapshot){
           if(snapshot.val() == false){// If we're not currently connected, don't do anything.
@@ -455,19 +456,17 @@
             status.innerHTML = offDB.state.toUpperCase();
             return;
           };
-          statusDB.onDisconnect().set(offDB).then(function(){
-            statusDB.set(onDB);
+          statusDB.onDisconnect().update(offDB).then(function(){
+            statusDB.set(onDB);            
             status.className = onDB.state;
             status.innerHTML = onDB.state.toUpperCase();
           });
         });
       }
-
       $('#status').on('click',async function(){
         location.reload();
       });
-    })
-    .catch((error) => {
+    }).catch((error) => {
       console.log(error.message);
     });
   </script>
