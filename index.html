@@ -438,6 +438,9 @@
       }
       
       async function onoff(){
+        var now = new Date(),
+         [month, day, year] = [(now.getMonth()+1), now.getDate(), now.getFullYear()],
+         d = year.toString()+month.toString()+day.toString();
         var statusDB = firebase.database().ref('/status/'+brandL),
         offDB = {
             state: 'offline',
@@ -446,7 +449,7 @@
         onDB = {
             state: 'online',
             last_changed: firebase.database.ServerValue.TIMESTAMP,
-            onTime: firebase.database.ServerValue.TIMESTAMP
+            onTime: {[d]:firebase.database.ServerValue.TIMESTAMP}
           };
         firebase.database().ref('.info/connected').on('value',function(snapshot){
           if(snapshot.val() == false){// If we're not currently connected, don't do anything.
