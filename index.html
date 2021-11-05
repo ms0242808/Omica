@@ -439,7 +439,7 @@
       
       async function onoff(){
         var now = new Date(),
-         [month, day, year] = [(now.getMonth()+1), now.getDate(), now.getFullYear()],
+         [month, day, year] = [(("0"+((now.getMonth()+1))).slice(-2)), ("0"+now.getDate()).slice(-2), now.getFullYear()],
          d = year.toString()+month.toString()+day.toString();
         var statusDB = firebase.database().ref('/status/'+brandL),
         offDB = {
