@@ -230,6 +230,9 @@
           arr.push(cloudtime);
           localDB.set('Update',arr);
           $('#update').text(cloudtime);
+          const machinUpdate = db.doc('status/'+brandL);
+          await machinUpdate.update({["Recipe-Update"]:true});
+          console.log("Newest recipe");
           setTimeout(function(){$('#pullRecipe').text('')},1000);
         }else{
           console.log("Updated");
