@@ -44,7 +44,7 @@ function sendStatusToWindow(text){
 
 function autoUpdateCheck(){
   autoUpdater.checkForUpdatesAndNotify();
-  setTimeout(autoUpdateCheck,60000);
+  setTimeout(autoUpdateCheck,1800000);
 }
 
 app.on('ready', () => {
