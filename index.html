@@ -102,6 +102,7 @@
       console.log("Logged in Success");
       const JSONdb = require('simple-json-db'),
       localDB = new JSONdb("C:/Users/Administrator/AppData/Local/Programs/omica/db.json"),
+      // localDB = new JSONdb('db.json'),
       fs = require('fs'),
       electron = require('electron'),
       path = require('path'),
@@ -194,8 +195,8 @@
                 await recipefunction({docPath:'recipes/'+brandL,drink:drink[i].toString()}).then(result => {
                   rows = result.data.recipe.slice(0,-1);
                   recipeNo = result.data.number;
-                  if(recipeNo !== preNo){recipeNo = preNo}
-                  preNo = recipeNo + 400;
+                  // if(recipeNo !== preNo){recipeNo = preNo}
+                  // preNo = recipeNo;// + 400;
                   rows.map(function(item,index){
                     item.unshift(recipeNo,drink[i]);
                     recipeNo += 1;
