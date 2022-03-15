@@ -293,6 +293,10 @@
       }
 
       async function getDrinkList(){
+        const getcatDrink = firebase.functions().httpsCallable('getCategoryDrink');
+        var cat = await getCategory(),
+        catDrink = [];
+        for(c in cat){await getcatDrink({docPath:'recipes/'+brandL,category:cat[c]}).then(result => {if(result.data.status){result.data.onDrink.map(function(item,index){catDrink.push(item);});}});}
         const getDrinkList = firebase.functions().httpsCallable('getDrinkList');
         var [drinks,name,opt] = [[],[],[]];
         await getDrinkList({docPath:'recipes/'+brandL}).then(result => {
@@ -301,15 +305,17 @@
         });
         var no = 1;
         for(o in opt){
-          var x = Math.floor(opt[o]["no"]/400)+1,
-          y = opt[parseInt(o)+1];
-          drinks.push([no,name[o],opt[o]["on"],opt[o]["L"],opt[o]["M"],opt[o]["topping"],opt[o]["ice"]].flat());
-          no++;
-          if(typeof y !== 'undefined'){
-            if(x !== Math.floor(y["no"]/400)+1){
-              for(var n=no%10; n<11; n++){
-                drinks.push([no,"",0,1,1,1,1,1,1,1,1,1,1,1]);
-                no++;
+          if(catDrink.includes(name[o])){
+            var x = Math.floor(opt[o]["no"]/400)+1,
+            y = opt[parseInt(o)+1];
+            drinks.push([no,name[o],opt[o]["on"],opt[o]["L"],opt[o]["M"],opt[o]["topping"],opt[o]["ice"]].flat());
+            no++;
+            if(typeof y !== 'undefined'){
+              if(x !== Math.floor(y["no"]/400)+1){
+                for(var n=no%10; n<11; n++){
+                  drinks.push([no,"",0,1,1,1,1,1,1,1,1,1,1,1]);
+                  no++;
+                }
               }
             }
           }
